@@ -1,4 +1,18 @@
 const TeamMember = require("../Model/TeamMember");
+const { uploadFileToSpaces } = require("../Utill/S3.js");
+const { deleteFile } = require('../utils/S3.js');
+const { PutObjectCommand } = require('@aws-sdk/client-s3');
+const { S3Client } = require('@aws-sdk/client-s3');
+
+const s3Client = new S3Client({
+    region: process.env.AWS_REGION,
+    credentials: {
+        accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+    },
+});
+// Define the UPLOADS_FOLDER
+const UPLOADS_FOLDER = "uploads/";
 
 // Create a Team Member
 exports.addMember = async (req, res) => {
@@ -10,6 +24,17 @@ exports.addMember = async (req, res) => {
         message: "All fields are required",
         status: false,
       });
+    }
+
+        if (Files.imageurl?.[0]) {
+      if (updated?.imageurl) {
+        const isDeleted = await deleteFileFromSpaces(updated.imageurl);
+        if (!isDeleted) {
+          return res.status(500).json({ status: false, message: "Unable to delete old hero_img_second" });
+        }
+      }
+      const fileKey = await uploadFileToSpaces(Files.imageurl[0]);
+      updateData.imageurl = fileKey; // ✅
     }
 
     const member = await TeamMember.create({
