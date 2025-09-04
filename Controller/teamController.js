@@ -1,6 +1,5 @@
 const TeamMember = require("../Model/TeamMember");
 const { uploadFileToSpaces } = require("../Utill/S3.js");
-const { deleteFile } = require('../utils/S3.js');
 const { PutObjectCommand } = require('@aws-sdk/client-s3');
 const { S3Client } = require('@aws-sdk/client-s3');
 
