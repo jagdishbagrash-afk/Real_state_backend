@@ -1,5 +1,5 @@
 const Project = require("../Model/Project");
-const catchAsync = require('../utill/catchAsync');
+const catchAsync = require('../Utill/catchAsync');
 
 
 
