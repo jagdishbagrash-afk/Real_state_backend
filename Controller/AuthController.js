@@ -1,10 +1,10 @@
 const jwt = require("jsonwebtoken");
-const catchAsync = require("../utill/catchAsync");
+const catchAsync = require("../Utill/catchAsync");
 const User = require("../Model/User");
 const { promisify } = require("util");
 const bcrypt = require("bcrypt");
-const { errorResponse, successResponse } = require("../utill/ErrorHandling");
-const logger = require("../utill/Logger");
+const { errorResponse, successResponse } = require("../Utill/ErrorHandling");
+const logger = require("../Utill/Logger");
 
 
 
