@@ -4,7 +4,7 @@ const logger = require("./Utill/Logger");
 
 dotenv.config();
 
-mongoose.connect("mongodb://localhost:27017/real_state", {
+mongoose.connect(process.env.DB_URL, {
    serverSelectionTimeoutMS: 5000,
    autoIndex: false,
    maxPoolSize: 10,
