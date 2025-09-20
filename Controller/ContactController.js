@@ -2,7 +2,6 @@ const contactmodal = require("../Model/Contact");
 const catchAsync = require('../Utill/catchAsync');
 const logger = require("../Utill/Logger");
 const emailTemplate = require("../contactemail")
-
 const nodemailer = require("nodemailer");
 
 exports.ContactPost = catchAsync(async (req, res) => {
@@ -56,7 +55,7 @@ exports.ContactPost = catchAsync(async (req, res) => {
 
         res.json({
             status: true,
-            message: "✅ Request submitted & emails sent successfully.",
+            message: " Request submitted & emails sent successfully.",
         });
 
     } catch (error) {

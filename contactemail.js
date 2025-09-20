@@ -4,7 +4,7 @@ module.exports = ({ name, email, phone_number, services, message, isUser = false
     <tr bgcolor="#141414">
       <td style="padding:20px 2px 0 2px;text-align:center;">
         <p style="margin:1px;">
-          <img style="max-width:150px;" src="https://f003.backblazeb2.com/file/Event-management/logo.png" alt="cadmaxpro.com Logo">
+          <img style="max-width:150px;" src="/logo.png" alt="cadmaxpro.com Logo">
         </p>
       </td>
     </tr>
