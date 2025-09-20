@@ -1,6 +1,6 @@
 const express = require('express');
 
-const { ContactPost, ContactGet } = require("../Controller/ContactController");
+const { ContactPost, ContactGet, ContactPortPost, ContactPortGet } = require("../Controller/ContactController");
 const router = express.Router();
 
 //contact  List 
@@ -8,6 +8,11 @@ const router = express.Router();
 router.post("/contact-add", ContactPost);
 
 router.get("/contact-get", ContactGet);
+
+
+router.post("/port-add", ContactPortPost);
+
+router.get("/port-get", ContactPortGet);
 
 
 
