@@ -1,6 +1,7 @@
 const contactmodal = require("../Model/Contact");
 const catchAsync = require('../Utill/catchAsync');
 const logger = require("../Utill/Logger");
+const emailTemplate = require("../contactemail")
 
 const nodemailer = require("nodemailer");
 
@@ -9,7 +10,6 @@ exports.ContactPost = catchAsync(async (req, res) => {
         const { email, name, message, services, phone_number } = req.body;
 
         if (!email || !name || !message || !services || !phone_number) {
-            logger.warn("All fields (email, name, message, services, phone_number) are required.");
             return res.status(400).json({
                 status: false,
                 message: "All fields (email, name, message, services, phone_number) are required.",
@@ -20,74 +20,55 @@ exports.ContactPost = catchAsync(async (req, res) => {
         const record = new contactmodal({ email, name, message, services, phone_number });
         const result = await record.save();
 
-        if (result) {
-            // 🔹 Step 3: Setup Nodemailer Transport
-            const transporter = nodemailer.createTransport({
-                host: "smtp.gmail.com", // या आपका SMTP server
-                port: 587,
-                secure: false, // true for 465, false for 587
-                auth: {
-                    user: process.env.EMAIL_USER, // ✅ env में रखो
-                    pass: process.env.EMAIL_PASS, // ✅ env में रखो
-                },
-            });
-
-            // 🔹 Step 4: Send Mail
-            await transporter.sendMail({
-                from: `"My Website" <${process.env.EMAIL_USER}>`,
-                to: email, // User को confirmation mail
-                subject: "Thank You for Contacting Us!",
-                html: `
-                  <h2>Hello ${name},</h2>
-                  <p>Thank you for contacting us. Here are your details:</p>
-                  <ul>
-                    <li><b>Email:</b> ${email}</li>
-                    <li><b>Phone:</b> ${phone_number}</li>
-                    <li><b>Service:</b> ${services}</li>
-                    <li><b>Message:</b> ${message}</li>
-                  </ul>
-                  <p>We will get back to you shortly.</p>
-                  <br/>
-                  <p>Best Regards,<br/>My Website Team</p>
-                `,
-            });
-
-            // 🔹 Optional: Admin को भी mail
-            await transporter.sendMail({
-                from: `"My Website" <${process.env.EMAIL_USER}>`,
-                to: "admin@yourdomain.com", // अपना email डालना
-                subject: "New Contact Request",
-                html: `
-                  <h2>New Contact Request</h2>
-                  <ul>
-                    <li><b>Name:</b> ${name}</li>
-                    <li><b>Email:</b> ${email}</li>
-                    <li><b>Phone:</b> ${phone_number}</li>
-                    <li><b>Service:</b> ${services}</li>
-                    <li><b>Message:</b> ${message}</li>
-                  </ul>
-                `,
-            });
-
-            res.json({
-                status: true,
-                message: "Thank You – Your Request Has Been Successfully Submitted & Email Sent",
-            });
-        } else {
-            res.json({
+        if (!result) {
+            return res.status(500).json({
                 status: false,
-                error: result,
-                message: "Failed to Contact.",
+                message: "Failed to save contact details.",
             });
         }
+
+        // Nodemailer Transport
+        const transporter = nodemailer.createTransport({
+            host: "smtp.gmail.com",
+            port: 587,
+            secure: false,
+            auth: {
+                user: process.env.EMAIL_USER,
+                pass: process.env.EMAIL_PASS,
+            },
+        });
+
+        // 1️⃣ Send Confirmation to User
+        await transporter.sendMail({
+            from: `"Cadmaxpro " <${process.env.EMAIL_USER}>`,
+            to: email,
+            subject: "Thank You for Contacting Cadmaxpro! 🌟",
+            html: emailTemplate({ name, email, phone_number, services, message, isUser: true }),
+        });
+
+        // 2️⃣ Send Notification to Admin
+        await transporter.sendMail({
+            from: `"Cadmaxpro Website" <${process.env.EMAIL_USER}>`,
+            to: "ankitkumarjain0748@gmail.com", 
+            subject: "📩 New Contact Request",
+            html: emailTemplate({ name, email, phone_number, services, message }),
+        });
+
+        res.json({
+            status: true,
+            message: "✅ Request submitted & emails sent successfully.",
+        });
+
     } catch (error) {
         logger.error(error);
         res.status(500).json({
-            msg: "Failed to send Contact",
+            status: false,
+            message: "❌ Failed to send contact request.",
             error: error.message,
         });
     }
 });
+
 
 
 exports.ContactGet = catchAsync(async (req, res, next) => {
