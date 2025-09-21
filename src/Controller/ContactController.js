@@ -1,6 +1,5 @@
 const contactmodal = require("../Model/Contact");
 const portfoliocontact = require("../Model/portfoliocontact");
-
 const catchAsync = require('../Utill/catchAsync');
 const logger = require("../Utill/Logger");
 const emailTemplate = require("../contactemail")

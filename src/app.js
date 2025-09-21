@@ -29,7 +29,7 @@ app.use("/api", require("./Routes/ContactRoute"));
 // app.use("/api", require("./Routes/JobRoute"));
 // app.use("/api", require("./Routes/BlogRoute"));
 // app.use("/api", require("./Routes/jobAddRoutes"));
-app.use("/api", require("./Routes/ProjectRoute"));
+// app.use("/api", require("./Routes/ProjectRoute"));
 app.use("/api", require("./Routes/teamRoutes"));
 // app.use("/api", require("./Routes/AuthRoute"));
 
