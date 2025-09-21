@@ -1,7 +1,7 @@
 const contactmodal = require("../Model/Contact");
 const portfoliocontact = require("../Model/portfoliocontact");
 const catchAsync = require('../Utill/catchAsync');
-const logger = require("../Utill/Logger");
+// const logger = require("../Utill/Logger");
 const emailTemplate = require("../contactemail")
 const nodemailer = require("nodemailer");
 
@@ -60,7 +60,7 @@ exports.ContactPost = catchAsync(async (req, res) => {
         });
 
     } catch (error) {
-        logger.error(error);
+        // logger.error(error);
         res.status(500).json({
             status: false,
             message: "❌ Failed to send contact request.",
@@ -96,7 +96,7 @@ exports.ContactGet = catchAsync(async (req, res, next) => {
             msg: "Contact Get",
         });
     } catch (error) {
-        logger.error(error);
+        // logger.error(error);
         res.status(500).json({
             msg: "Failed to fetch Contact get",
             error: error.message,
@@ -154,7 +154,7 @@ exports.ContactPortPost = catchAsync(async (req, res) => {
         });
 
     } catch (error) {
-        logger.error(error);
+        // logger.error(error);
         res.status(500).json({
             status: false,
             message: "❌ Failed to send contact request.",
@@ -188,7 +188,7 @@ exports.ContactPortGet = catchAsync(async (req, res, next) => {
             msg: "Contact Get",
         });
     } catch (error) {
-        logger.error(error);
+        // logger.error(error);
         res.status(500).json({
             msg: "Failed to fetch Contact get",
             error: error.message,
