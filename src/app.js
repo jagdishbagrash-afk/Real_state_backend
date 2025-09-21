@@ -25,12 +25,12 @@ app.get("/", (req, res) => {
 });
 
 const PORT = process.env.REACT_APP_SERVER_DOMAIN || 5000;
-// app.use("/api", require("./Routes/ContactRoute"));
-// app.use("/api", require("./Routes/JobRoute"));
-// app.use("/api", require("./Routes/BlogRoute"));
+app.use("/api", require("./Routes/ContactRoute"));
+app.use("/api", require("./Routes/JobRoute"));
+app.use("/api", require("./Routes/BlogRoute"));
 // app.use("/api", require("./Routes/jobAddRoutes"));
 // app.use("/api", require("./Routes/ProjectRoute"));
-// app.use("/api", require("./Routes/teamRoutes"));
+app.use("/api", require("./Routes/teamRoutes"));
 // app.use("/api", require("./Routes/AuthRoute"));
 
 
