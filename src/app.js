@@ -34,7 +34,7 @@ app.use("/api", require("./Routes/teamRoutes"));
 app.use("/api", require("./Routes/BlogRoute"));
 // app.use("/api", require("./Routes/JobRoute"));
 
-app.use("/api", require("./Routes/ContactRoute"));
+// app.use("/api", require("./Routes/ContactRoute"));
 
 
 const server = app.listen(PORT, () => console.log("Server is running at port : " + PORT));
