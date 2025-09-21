@@ -143,9 +143,9 @@ exports.ContactPortPost = catchAsync(async (req, res) => {
 
         // 1️⃣ Send Confirmation to User
         await transporter.sendMail({
-            from: `"Cadmaxpro " <${process.env.EMAIL_USER}>`,
+            from: `"Portfoilo " <${process.env.EMAIL_USER}>`,
             to: email,
-            subject: "Thank You for Contacting Cadmaxpro! 🌟",
+            subject: "Thank You for Contacting Portfoilo! 🌟",
             html: emailTemplate({ name, email, phone_number, services : subject, message, isUser: true }),
         });
 
