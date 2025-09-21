@@ -3,7 +3,7 @@ const catchAsync = require("../Utill/catchAsync");
 const User = require("../Model/User");
 const bcrypt = require("bcrypt");
 const { errorResponse, successResponse } = require("../Utill/ErrorHandling");
-const logger = require("../Utill/Logger");
+// const logger = require("../Utill/Logger");
 
 
 const signToken = async (id) => {
@@ -86,7 +86,7 @@ exports.signup = catchAsync(async (req, res) => {
       userId: result._id,
     });
   } catch (error) {
-    logger.error("Error during signup:", error);
+    // logger.error("Error during signup:", error);
     return errorResponse(res, error.message || "Internal Server Error", 500);
   }
 });
@@ -157,7 +157,7 @@ exports.profilegettoken = catchAsync(async (req, res, next) => {
       msg: "Profile retrieved successfully",
     });
   } catch (error) {
-    logger.error("Error deleting user record:", error);
+    // logger.error("Error deleting user record:", error);
     res.status(500).json({
       msg: "Failed to fetch profile",
       error: error.message,
@@ -179,7 +179,7 @@ exports.resetpassword = catchAsync(async (req, res) => {
     await user.save();
     res.json({ message: "Password has been reset successfully!" });
   } catch (error) {
-    logger.error("Error fetching booking:", error);
+    // logger.error("Error fetching booking:", error);
     res.status(500).json({ message: "Error resetting password", error });
   }
 });
