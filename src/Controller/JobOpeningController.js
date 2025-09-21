@@ -1,13 +1,12 @@
 const JobOpeningmodal = require("../Model/JobOpening");
 const catchAsync = require('../Utill/catchAsync');
-const logger = require("../Utill/Logger");
 
 exports.JobPost = catchAsync(async (req, res) => {
     try {
         const { email, name, position, resume, phone_number ,city } = req.body;
 
         if (!email || !name || !position || !phone_number) {
-            logger.warn("All fields (email, name,  position,resume, phone_number) are required.")
+            // logger.warn("All fields (email, name,  position,resume, phone_number) are required.")
             return res.status(400).json({
                 status: false,
                 message: "All fields (email, name,  position,resume, phone_number) are required.",
@@ -31,7 +30,7 @@ exports.JobPost = catchAsync(async (req, res) => {
             });
         }
     } catch (error) {
-        logger.error(error);
+        // logger.error(error);
         res.status(500).json({
             msg: "Failed to send Contact",
             error: error.message,
@@ -64,7 +63,7 @@ exports.JobGet = catchAsync(async (req, res, next) => {
             msg: "Job Opening Get",
         });
     } catch (error) {
-        logger.error(error);
+        // logger.error(error);
         res.status(500).json({
             msg: "Failed to fetch Contact get",
             error: error.message,
