@@ -18,13 +18,13 @@ app.use(express.json({ limit: '2000mb' }));
 app.use(express.urlencoded({ extended: true, limit: "2000mb" }));
 
 const PORT = process.env.REACT_APP_SERVER_DOMAIN || 5000;
-app.use("/api", require("./Routes/ContactRoute"));
-app.use("/api", require("./Routes/JobRoute"));
-app.use("/api", require("./Routes/BlogRoute"));
-app.use("/api", require("./Routes/jobAddRoutes"));
-app.use("/api", require("./Routes/ProjectRoute"));
-app.use("/api", require("./Routes/teamRoutes"));
-app.use("/api", require("./Routes/AuthRoute"));
+// app.use("/api", require("./Routes/ContactRoute"));
+// app.use("/api", require("./Routes/JobRoute"));
+// app.use("/api", require("./Routes/BlogRoute"));
+// app.use("/api", require("./Routes/jobAddRoutes"));
+// app.use("/api", require("./Routes/ProjectRoute"));
+// app.use("/api", require("./Routes/teamRoutes"));
+// app.use("/api", require("./Routes/AuthRoute"));
 
 
 
