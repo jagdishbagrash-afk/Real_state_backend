@@ -27,16 +27,20 @@ exports.ContactPost = catchAsync(async (req, res) => {
             });
         }
 
-        // Nodemailer Transport
-        const transporter = nodemailer.createTransport({
-            host: "smtp.gmail.com",
-            port: 587,
-            secure: false,
+         const transporter = nodemailer.createTransport({
+            host: "smtpout.secureserver.net", // ✅ GoDaddy SMTP Host
+            port: 465,                        // ✅ SSL Port
+            secure: true,                      // ✅ SSL enable
             auth: {
-                user: process.env.EMAIL_USER,
-                pass: process.env.EMAIL_PASS,
-            },
+                user: process.env.EMAIL_USER,  // e.g. info@cadmaxpro.com
+                pass: process.env.EMAIL_PASS   // e.g. #6PJU@hW8p5EFrG
+            }
         });
+
+        transporter.verify((err, success) => {
+    if (err) console.error("SMTP Error:", err);
+    else console.log("SMTP Server is ready to take messages");
+});
 
         // 1️⃣ Send Confirmation to User
         await transporter.sendMail({
@@ -49,7 +53,7 @@ exports.ContactPost = catchAsync(async (req, res) => {
         // 2️⃣ Send Notification to Admin
         await transporter.sendMail({
             from: `"Cadmaxpro Website" <${process.env.EMAIL_USER}>`,
-            to: "ankitkumarjain0748@gmail.com", 
+            to: process.env.EMAIL_USER,
             subject: "📩 New Contact Request",
             html: emailTemplate({ name, email, phone_number, services, message }),
         });
@@ -130,13 +134,15 @@ exports.ContactPortPost = catchAsync(async (req, res) => {
         }
 
         // Nodemailer Transport
-        const transporter = nodemailer.createTransport({
+       
+
+         const transporter = nodemailer.createTransport({
             host: "smtp.gmail.com",
-            port: 587,
+            port: 465,
             secure: false,
             auth: {
-                user: process.env.EMAIL_USER,
-                pass: process.env.EMAIL_PASS,
+                user: process.env.EMAIL_USERS,
+                pass: process.env.EMAIL_PASSS,
             },
         });
 
@@ -145,7 +151,7 @@ exports.ContactPortPost = catchAsync(async (req, res) => {
             from: `"Portfoilo " <${process.env.EMAIL_USER}>`,
             to: email,
             subject: "Thank You for Contacting Portfoilo! 🌟",
-            html: emailTemplate({ name, email, phone_number, services : subject, message, isUser: true }),
+            html: emailTemplate({ name, email, phone_number, services: subject, message, isUser: true }),
         });
 
         res.json({
@@ -155,6 +161,7 @@ exports.ContactPortPost = catchAsync(async (req, res) => {
 
     } catch (error) {
         // logger.error(error);
+        console.log(error)
         res.status(500).json({
             status: false,
             message: "❌ Failed to send contact request.",
