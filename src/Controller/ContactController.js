@@ -27,7 +27,7 @@ exports.ContactPost = catchAsync(async (req, res) => {
             });
         }
 
-         const transporter = nodemailer.createTransport({
+        const transporter = nodemailer.createTransport({
             host: "smtpout.secureserver.net", // ✅ GoDaddy SMTP Host
             port: 465,                        // ✅ SSL Port
             secure: true,                      // ✅ SSL enable
@@ -38,9 +38,9 @@ exports.ContactPost = catchAsync(async (req, res) => {
         });
 
         transporter.verify((err, success) => {
-    if (err) console.error("SMTP Error:", err);
-    else console.log("SMTP Server is ready to take messages");
-});
+            if (err) console.error("SMTP Error:", err);
+            else console.log("SMTP Server is ready to take messages");
+        });
 
         // 1️⃣ Send Confirmation to User
         await transporter.sendMail({
@@ -115,6 +115,7 @@ exports.ContactPortPost = catchAsync(async (req, res) => {
     try {
         const { email, name, message, subject, phone_number } = req.body;
 
+        // 1️⃣ Basic empty check
         if (!email || !name || !message || !subject || !phone_number) {
             return res.status(400).json({
                 status: false,
@@ -122,7 +123,25 @@ exports.ContactPortPost = catchAsync(async (req, res) => {
             });
         }
 
-        // Save to DB
+        // 2️⃣ Email validation (simple regex)
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+            return res.status(400).json({
+                status: false,
+                message: "Please enter a valid email address.",
+            });
+        }
+
+        // 3️⃣ Phone number validation (10 digits only)
+        const phoneRegex = /^\d{10}$/;
+        if (!phoneRegex.test(phone_number)) {
+            return res.status(400).json({
+                status: false,
+                message: "Phone number must be exactly 10 digits.",
+            });
+        }
+
+        // 4️⃣ Save to DB
         const record = new portfoliocontact({ email, name, message, subject, phone_number });
         const result = await record.save();
 
@@ -133,35 +152,37 @@ exports.ContactPortPost = catchAsync(async (req, res) => {
             });
         }
 
-        // Nodemailer Transport
-       
-
-         const transporter = nodemailer.createTransport({
-            host: "smtp.gmail.com",
-            port: 465,
-            secure: false,
+        // 5️⃣ Nodemailer Transport (Use Gmail App Password!)
+        const transporter = nodemailer.createTransport({
+            service: "gmail",           // ✅ Simplified
             auth: {
-                user: process.env.EMAIL_USERS,
-                pass: process.env.EMAIL_PASSS,
+                user: process.env.MAIL_USERNAME,
+                pass: process.env.MAIL_PASSWORD, // Use Gmail App Password
             },
         });
 
-        // 1️⃣ Send Confirmation to User
+        // 6️⃣ Send Confirmation to User
         await transporter.sendMail({
-            from: `"Portfoilo " <${process.env.EMAIL_USER}>`,
+            from: `"Portfolio" <${process.env.MAIL_USERNAME}>`,
             to: email,
-            subject: "Thank You for Contacting Portfoilo! 🌟",
-            html: emailTemplate({ name, email, phone_number, services: subject, message, isUser: true }),
+            subject: "Thank You for Contacting Portfolio! 🌟",
+            html: emailTemplate({
+                name,
+                email,
+                phone_number,
+                services: subject,
+                message,
+                isUser: true
+            }),
         });
 
         res.json({
             status: true,
-            message: " Request submitted & emails sent successfully.",
+            message: "Request submitted & email sent successfully.",
         });
 
     } catch (error) {
-        // logger.error(error);
-        console.log(error)
+        console.log(error);
         res.status(500).json({
             status: false,
             message: "❌ Failed to send contact request.",
@@ -169,6 +190,7 @@ exports.ContactPortPost = catchAsync(async (req, res) => {
         });
     }
 });
+
 
 exports.ContactPortGet = catchAsync(async (req, res, next) => {
     try {
