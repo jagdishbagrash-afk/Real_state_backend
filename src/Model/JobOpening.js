@@ -31,5 +31,5 @@ const JobSchema = mongoose.Schema({
     }
 })
 
-const Contact = mongoose.model("jobs", JobSchema);
+const Contact = mongoose.model("carrers", JobSchema);
 module.exports = Contact;

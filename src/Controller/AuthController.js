@@ -6,8 +6,9 @@ const { errorResponse, successResponse } = require("../Utill/ErrorHandling");
 // const logger = require("../Utill/Logger");
 
 
+
 const signToken = async (id) => {
-  const token = jwt.sign({ id }, process.env.JWT_SECRET_KEY, {
+  const token = jwt.sign({ id }, process.env.JWT_SECRET, {
     expiresIn: "14400m",
   });
   return token;
@@ -16,66 +17,62 @@ const signToken = async (id) => {
 
 exports.isValidEmail = (email) => { const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; return emailRegex.test(email); };
 
+
 exports.verifyToken = async (req, res, next) => {
-  let authHeader = req.headers.Authorization || req.headers.authorization;
-  if (authHeader && authHeader.startsWith("Bearer")) {
-    let token = authHeader.split(" ")[1];
-    if (!token) {
+  try {
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
       return res.status(400).json({
         status: false,
-        message: "User is not authorized",
+        message: "User is not authorized or Token is missing",
       });
-    } else {
-      try {
-        const decode = await promisify(jwt.verify)(
-          token,
-          process.env.JWT_SECRET_KEY
-        );
-        console.log("decode" ,decode)
-        console.log("req.User" ,req.User)
-        if (decode) {
-          let result = await User.findById({ _id: decode.id });
-          if (result) {
-            req.User = result;
-            next();
-          } else {
-            return res.status(404).json({
-              status: false,
-              message: "User not found",
-            });
-          }
-        } else {
-          return res.status(401).json({
-            status: false,
-            message: "Unauthorized",
-          });
-        }
-      } catch (err) {
-        return res.status(401).json({
-          status: false,
-          message: "Invalid or expired token",
-          error: err,
-        });
-      }
     }
-  } else {
-    return res.status(400).json({
+
+    const token = authHeader.split(" ")[1];
+
+    // Verify token
+    const decode = jwt.verify(token, process.env.JWT_SECRET);
+    console.log("decode", decode)
+    if (!decode) {
+      return res.status(401).json({
+        status: false,
+        message: "Unauthorized",
+      });
+    }
+
+    // Find user
+    const user = await User.findById(decode.id);
+    if (!user) {
+      return res.status(404).json({
+        status: false,
+        message: "User not found",
+      });
+    }
+
+    req.User = user;
+    next();
+  } catch (err) {
+    console.log("Token verification error:", err);
+    return res.status(401).json({
       status: false,
-      message: "User is not authorized or Token is missing",
+      message: "Invalid or expired token",
+      error: err.message, // log error message
     });
   }
 };
 
 
+
+
 exports.signup = catchAsync(async (req, res) => {
   try {
     const { email, password, name, phone, profileImage } = req.body;
-    console.log("req.body" ,req.body)
-    const hashedPassword = await bcrypt.hash(password, 12);
+    console.log("req.body", req.body)
+    // const hashedPassword = await bcrypt.hash(password, 12);
     // Create new user with referral data
     const newUser = new User({
       email,
-      password: hashedPassword,
+      password: password,
       name,
       phone,
       profileImage
@@ -94,6 +91,7 @@ exports.signup = catchAsync(async (req, res) => {
 exports.login = catchAsync(async (req, res, next) => {
   try {
     const { email, password } = req.body;
+    console.log("req.body", req.body);
     if (!email || !password) {
       return res.status(401).json({
         status: false,
@@ -109,20 +107,21 @@ exports.login = catchAsync(async (req, res, next) => {
         message: "Invalid Email or password",
       });
     }
+    console.log("user", user)
 
     // Validate password
-    const isPasswordValid = await bcrypt.compare(password, user.password);
-    if (!isPasswordValid) {
-      return res.status(400).json({
-        status: false,
-        message: "Incorrect password. Please try again.",
-      });
-    }
+    // const isPasswordValid = await bcrypt.compare(password, user.password);
+    // if (!isPasswordValid) {
+    //   return res.status(400).json({
+    //     status: false,
+    //     message: "Incorrect password. Please try again.",
+    //   });
+    // }
 
     // Generate a token for the user
     const token = await signToken(user._id);
     const Profile = await User.findById(user._id).select("-password");
-
+    console.log("token", token)
     res.json({
       status: true,
       message: "Login Successfully!",
@@ -142,8 +141,8 @@ exports.login = catchAsync(async (req, res, next) => {
 
 exports.profilegettoken = catchAsync(async (req, res, next) => {
   try {
-    console.log("req", req.User)
     const userId = req?.User?._id;
+    console.log("userId", userId)
     if (!userId) {
       return res.status(400).json({ msg: "User not authenticated" });
     }
@@ -151,13 +150,11 @@ exports.profilegettoken = catchAsync(async (req, res, next) => {
     if (!userProfile) {
       return res.status(404).json({ msg: "User profile not found" });
     }
-    
     res.status(200).json({
       data: userProfile,
       msg: "Profile retrieved successfully",
     });
   } catch (error) {
-    // logger.error("Error deleting user record:", error);
     res.status(500).json({
       msg: "Failed to fetch profile",
       error: error.message,
@@ -189,12 +186,12 @@ exports.resetpassword = catchAsync(async (req, res) => {
 exports.updateProfile = async (req, res) => {
   try {
     const userId = req.User._id; // userId from token (middleware sets req.user)
-    const { name, phone, profileImage ,email } = req.body;
+    const { name, phone, profileImage, email } = req.body;
 
     // Find and update user
     const updatedUser = await User.findByIdAndUpdate(
       userId,
-      { name, phone, profileImage ,email },
+      { name, phone, profileImage, email },
       { new: true, runValidators: true }
     ).select("-password"); // exclude password
 

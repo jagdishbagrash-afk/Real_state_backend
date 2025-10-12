@@ -2,13 +2,13 @@ const mongoose = require("mongoose");
 
 const jobSchema = new mongoose.Schema({
   title: String,
+  content: String,
+  slug: String,
   location: String,
-  job_type: String,
+  image: String,
+  employment_type: String,
   experience: String,
-  about: String,
-  responsibilities: String,
-  qualifications: String,
-  offers: String,
+  Skills: String,
 }, { timestamps: true });
 
 module.exports = mongoose.model("jobadd", jobSchema);

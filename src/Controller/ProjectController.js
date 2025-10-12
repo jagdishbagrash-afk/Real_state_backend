@@ -1,31 +1,46 @@
 const Project = require("../Model/Project");
 const catchAsync = require('../Utill/catchAsync');
-
+const { deleteFile } = require("../Utill/S3");
 
 
 // Create a new project
-
 exports.CreateprojectAdd = catchAsync(async (req, res) => {
   try {
-    const { title, content, client, date, category, Image } = req.body;
+    const { title, content, client, date, category, client_review, client_name } = req.body;
+
+    console.log(req.files)
+    // 🧩 Files array comes in req.files['images[]']
+    const imageUrls = req.files['images[]']?.map(file => file.location) || [];
 
     const record = new Project({
-      title, Image, content, client, date, category
-    })
+      title,
+      content,
+      client,
+      date,
+      slug: title.toLowerCase().replace(/\s+/g, '-'),
+      category,
+      client_review,
+      client_name,
+      Image: imageUrls, // ✅ array of URLs
+    });
+
     await record.save();
 
     res.json({
       status: true,
-      message: "Project Added Successfully"
-    })
+      message: "Project added successfully",
+      data: record,
+    });
   } catch (error) {
-    console.log(error);
+    console.error("Error creating project:", error);
     res.status(400).json({
       status: false,
-      message: error.message
-    })
+      message: error.message,
+    });
   }
-})
+});
+
+
 
 exports.getAllProjectAll = catchAsync(async (req, res) => {
   try {
@@ -88,23 +103,38 @@ exports.updateProject = catchAsync(async (req, res) => {
 });
 
 
-exports.deleteProject = catchAsync(async (req, res) => {
-  const { _id } = req.body;
+exports.DeleteProject = catchAsync(async (req, res) => {
+  try {
+    const { _id } = req.body;
+    console.log("req.body", req.body)
+    const project = await Project.findById(_id);
+    if (!project) {
+      return res.status(404).json({ status: false, message: "Project not found" });
+    }
 
-  const deleted = await Project.findByIdAndDelete(_id);
+    // ✅ Delete all images from S3
+    if (project.Image && project.Image.length > 0) {
+      // Loop over each image URL
+      for (const url of project.Image) {
+        await deleteFile(url); // deleteFile handles single URL
+      }
+    }
 
-  if (!deleted) {
-    return res.status(404).json({
+    await project.deleteOne();
+
+    res.json({
+      status: true,
+      message: "Project deleted successfully (including images)",
+    });
+  } catch (error) {
+    console.error("Error deleting project:", error);
+    res.status(400).json({
       status: false,
-      message: "Project not found",
+      message: error.message,
     });
   }
-
-  res.json({
-    status: true,
-    message: "Project Deleted Successfully",
-  });
 });
+
 
 exports.GetProjectById = catchAsync(
   async (req, res) => {

@@ -1,32 +1,33 @@
 const Job = require("../Model/JobAdd");
+const { deleteFile } = require("../Utill/S3");
 
 // ✅ Create a new Job
 exports.createJob = async (req, res) => {
   try {
     const {
       title,
+      content,
       location,
-      job_type,
+      employment_type,
       experience,
-      about,
-      responsibilities,
-      qualifications,
-      offers,
+      Skills,
+
     } = req.body;
 
-    if (!title || !location || !job_type) {
+    console.log("req.body" ,req.body)
+    if (!title || !location || !employment_type) {
       return res.status(400).json({ error: "Title, location and job type are required." });
     }
 
     const job = await Job.create({
       title,
+      slug: title.toLowerCase().replace(/\s+/g, '-'),
       location,
-      job_type,
+      content,
       experience,
-      about,
-      responsibilities,
-      qualifications,
-      offers,
+      Skills,
+      employment_type,
+      image: req.file ? req.file.location : "",
     });
 
     res.status(201).json({
@@ -147,6 +148,12 @@ exports.updateJob = async (req, res) => {
 exports.deleteJob = async (req, res) => {
   try {
     const job = await Job.findByIdAndDelete(req.body._id);
+    if (job?.image) {
+      const deleteResponse = await deleteFile(job.image);
+      if (!deleteResponse.status) {
+        return errorResponse(res, "Failed to delete file from Cloud", 500, false);
+      }
+    }
 
     if (!job) {
       return res.status(404).json({ success: false, message: "Job not found." });

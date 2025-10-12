@@ -1,5 +1,6 @@
 const TeamMember = require("../Model/TeamMember");
 const { uploadFileToSpaces } = require("../Utill/S3.js");
+const { deleteFile } = require('../Utill/S3.js');
 const { PutObjectCommand } = require('@aws-sdk/client-s3');
 const { S3Client } = require('@aws-sdk/client-s3');
 
@@ -14,32 +15,25 @@ const s3Client = new S3Client({
 const UPLOADS_FOLDER = "uploads/";
 
 // Create a Team Member
+
 exports.addMember = async (req, res) => {
   try {
-    const { name, imageurl, position } = req.body;
-
+    console.log("Body:", req.file);
+    const { name, position  } = req.body;
+    const  fileUrl = req.file ? req.file.location : null;
+    console.log("File URL:", fileUrl);
     if (!name || !position) {
       return res.status(400).json({
-        message: "All fields are required",
+        message: "Name and Position are required",
         status: false,
       });
     }
 
-        if (Files.imageurl?.[0]) {
-      if (updated?.imageurl) {
-        const isDeleted = await deleteFileFromSpaces(updated.imageurl);
-        if (!isDeleted) {
-          return res.status(500).json({ status: false, message: "Unable to delete old hero_img_second" });
-        }
-      }
-      const fileKey = await uploadFileToSpaces(Files.imageurl[0]);
-      updateData.imageurl = fileKey; // ✅
-    }
-
+    // If file uploaded, send it to S3/Spaces
     const member = await TeamMember.create({
       name,
       position,
-      imageurl,
+      imageUrl: req.file.location || "",
     });
 
     res.status(201).json({
@@ -48,7 +42,8 @@ exports.addMember = async (req, res) => {
       status: true,
     });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error("Error adding member:", err);
+    res.status(500).json({ error: err.message, status: false });
   }
 };
 
@@ -103,8 +98,14 @@ exports.deleteMember = async (req, res) => {
     if (!_id) {
       return res.status(400).json({ message: "Member ID is required", status: false });
     }
-
     const deleted = await TeamMember.findByIdAndDelete(_id);
+      if(deleted?.imageUrl)
+      {
+        const deleteResponse = await deleteFile(deleted.imageUrl);
+        if (!deleteResponse.status) {
+          return errorResponse(res, "Failed to delete file from Cloud", 500, false);
+        }
+      }
 
     if (!deleted) {
       return res.status(404).json({ message: "Member not found", status: false });

@@ -7,7 +7,7 @@ userRoute.post("/login", login)
 
 userRoute.post("/reset-password", verifyToken, resetpassword)
 
-userRoute.get("/profile-token", verifyToken ,  profilegettoken)
+userRoute.get("/profile", verifyToken,  profilegettoken)
 
 userRoute.post("/profile-update", verifyToken ,  updateProfile)
 

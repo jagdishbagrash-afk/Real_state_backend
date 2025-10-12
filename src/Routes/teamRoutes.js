@@ -1,8 +1,8 @@
 const express = require("express");
-const router = express.Router();
 const teamController = require("../Controller/teamController");
-
-router.post("/teams", teamController.addMember);
+const router = express.Router();
+const { upload } = require("../Utill/S3");
+router.post("/teams",upload.single('file'), teamController.addMember);
 router.get("/teams", teamController.getMembers);
 router.post("/teams-edit", teamController.updateMember);
 router.post("/teams-delete", teamController.deleteMember);

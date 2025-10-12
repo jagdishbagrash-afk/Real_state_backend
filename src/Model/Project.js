@@ -23,6 +23,7 @@ const ProjectModel = mongoose.Schema({
         type: Date,
         default: Date.now
     },
+    slug: String,
     Image: {
         type: Array,
         required: true
@@ -30,7 +31,9 @@ const ProjectModel = mongoose.Schema({
     created_at: {
         type: Date,
         default: Date.now
-    }
+    },
+    client_review: String,
+    client_name: String
 })
 
 const ProjectModels = mongoose.model("projects", ProjectModel);

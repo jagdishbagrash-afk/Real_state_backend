@@ -3,17 +3,17 @@ const catchAsync = require('../Utill/catchAsync');
 
 exports.JobPost = catchAsync(async (req, res) => {
     try {
-        const { email, name, position, resume, phone_number ,city } = req.body;
+        const { email, name, position, phone_number, city } = req.body;
 
+        console.log(req.file)
         if (!email || !name || !position || !phone_number) {
-            // logger.warn("All fields (email, name,  position,resume, phone_number) are required.")
             return res.status(400).json({
                 status: false,
                 message: "All fields (email, name,  position,resume, phone_number) are required.",
             });
         }
         const record = new JobOpeningmodal({
-            email, name,  position,resume, phone_number ,city
+            email, name, position, resume: req.file.location, phone_number, city
         });
 
         const result = await record.save();
