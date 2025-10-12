@@ -14,7 +14,7 @@ exports.createJob = async (req, res) => {
 
     } = req.body;
 
-    console.log("req.body" ,req.body)
+    console.log("req.body", req.body)
     if (!title || !location || !employment_type) {
       return res.status(400).json({ error: "Title, location and job type are required." });
     }
@@ -48,7 +48,7 @@ exports.createJob = async (req, res) => {
 // ✅ Get all Jobs
 exports.getJobs = async (req, res) => {
   try {
-    const jobs = await Job.find().sort({ createdAt: -1 });
+    const jobs = await Job.find();
     res.status(200).json({
       success: true,
       message: "All jobs fetched successfully.",
@@ -68,7 +68,12 @@ exports.getJobs = async (req, res) => {
 // ✅ Get single Job by ID
 exports.getJob = async (req, res) => {
   try {
-    const job = await Job.findById(req.params.id);
+    const { slug } = req.params;
+    console.log("Fetching job with slug:", slug);
+
+    // Correct usage: pass an object as filter
+    const job = await Job.findOne({ slug: slug });
+
     if (!job) {
       return res.status(404).json({
         success: false,
@@ -90,6 +95,8 @@ exports.getJob = async (req, res) => {
     });
   }
 };
+
+
 
 // ✅ Update Job
 exports.updateJob = async (req, res) => {

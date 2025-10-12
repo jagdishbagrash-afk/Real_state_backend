@@ -8,7 +8,7 @@ const jobSchema = new mongoose.Schema({
   image: String,
   employment_type: String,
   experience: String,
-  Skills: String,
+   Skills: String, 
 }, { timestamps: true });
 
 module.exports = mongoose.model("jobadd", jobSchema);
