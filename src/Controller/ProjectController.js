@@ -2,43 +2,50 @@ const Project = require("../Model/Project");
 const catchAsync = require('../Utill/catchAsync');
 const { deleteFile } = require("../Utill/S3");
 
-
 // Create a new project
-exports.CreateprojectAdd = catchAsync(async (req, res) => {
+exports.CreateprojectAdd = async (req, res) => {
   try {
-    const { title, content, client, date, category, client_review, client_name } = req.body;
+    const {
+      title,
+      content,
+      client,
+      category,
+      client_review,
+      client_name,
+      location,
+      status,
+    } = req.body;
 
-    console.log(req.files)
-    // 🧩 Files array comes in req.files['images[]']
-    const imageUrls = req.files['images[]']?.map(file => file.location) || [];
+
+    const imageUrls = req.files["images[]"]?.map((f) => f.location) || [];
+    const banner_image = req.files["banner_image"]?.[0]?.location || "";
+    const list_image = req.files["list_image"]?.[0]?.location || "";
+
 
     const record = new Project({
       title,
       content,
       client,
-      date,
-      slug: title.toLowerCase().replace(/\s+/g, '-'),
       category,
       client_review,
       client_name,
-      Image: imageUrls, // ✅ array of URLs
+      location,
+      date,
+      slug: title.toLowerCase().replace(/\s+/g, "-"),
+      banner_image,
+      list_image,
+      Image: imageUrls,
+      status
     });
 
     await record.save();
-
-    res.json({
-      status: true,
-      message: "Project added successfully",
-      data: record,
-    });
-  } catch (error) {
-    console.error("Error creating project:", error);
-    res.status(400).json({
-      status: false,
-      message: error.message,
-    });
+    res.json({ status: true, message: "Project added successfully", data: record });
+  } catch (err) {
+    console.error("Error creating project:", err);
+    res.status(400).json({ status: false, message: err.message });
   }
-});
+};
+
 
 
 
@@ -111,6 +118,10 @@ exports.DeleteProject = catchAsync(async (req, res) => {
     if (!project) {
       return res.status(404).json({ status: false, message: "Project not found" });
     }
+
+    await deleteFile(project.banner_image); // deleteFile handles single URL
+
+    await deleteFile(project.list_image); // deleteFile handles single URL
 
     // ✅ Delete all images from S3
     if (project.Image && project.Image.length > 0) {

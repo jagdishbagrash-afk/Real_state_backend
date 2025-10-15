@@ -6,9 +6,15 @@ const router = express.Router();
 
 //contact  List 
 
-router.post("/project-add", upload.fields([{ name: "images[]", maxCount: 10 }]), CreateprojectAdd);
-
-
+router.post(
+  "/project-add",
+  upload.fields([
+    { name: "banner_image", maxCount: 1 },
+    { name: "list_image", maxCount: 1 },
+    { name: "images[]", maxCount: 10 },
+  ]),
+  CreateprojectAdd
+);
 router.get("/project-get", getAllProjectAll);
 
 router.get("/project-get/:Id", GetProjectById);

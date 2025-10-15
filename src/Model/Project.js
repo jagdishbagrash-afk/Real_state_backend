@@ -19,10 +19,6 @@ const ProjectModel = mongoose.Schema({
         type: String,
         required: true
     },
-    date: {
-        type: Date,
-        default: Date.now
-    },
     slug: String,
     Image: {
         type: Array,
@@ -33,7 +29,15 @@ const ProjectModel = mongoose.Schema({
         default: Date.now
     },
     client_review: String,
-    client_name: String
+    banner_image: String,
+    list_image: String,
+    location: String,
+    client_name: String,
+    status : {
+        type: String,
+        enum: ['ongoing', 'completed', 'upcoming'],
+        default: 'completed'
+    }
 })
 
 const ProjectModels = mongoose.model("projects", ProjectModel);
