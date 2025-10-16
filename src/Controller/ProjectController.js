@@ -147,31 +147,39 @@ exports.DeleteProject = catchAsync(async (req, res) => {
 });
 
 
-exports.GetProjectById = catchAsync(
-  async (req, res) => {
-    try {
-      const { Id } = req.params;
-      if (!Id) {
-        logger.warn("Project ID is required")
-        return res.status(400).json({ msg: "Project ID is required" });
-      }
-      const Projects = await Project.findById(Id);
-      if (!Projects) {
-        return res.status(404).json({
-          status: false,
-          message: 'Project not found',
-        });
-      }
-      res.status(200).json({
-        status: true,
-        data: Projects,
-        message: 'Project fetched successfully',
-      });
-    } catch (error) {
-      res.status(400).json({
+exports.GetProjectById = catchAsync(async (req, res) => {
+  try {
+    const { slug } = req.params;
+    console.log("slug:", slug, "| type:", typeof slug);
+
+    if (!slug || typeof slug !== "string") {
+      return res.status(400).json({ status: false, message: "Invalid slug" });
+    }
+
+    // ✅ Correct query
+    const project = await Project.findOne({ slug: slug.trim() });
+
+    console.log("project:", project);
+
+    if (!project) {
+      return res.status(404).json({
         status: false,
-        message: error.message,
+        message: "Project not found",
       });
     }
+
+    res.status(200).json({
+      status: true,
+      data: project,
+      message: "Project fetched successfully",
+    });
+  } catch (error) {
+    console.error("Error in GetProjectById:", error);
+    res.status(400).json({
+      status: false,
+      message: error.message,
+    });
   }
-);
+});
+
+

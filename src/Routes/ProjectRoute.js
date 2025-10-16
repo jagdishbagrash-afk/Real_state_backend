@@ -17,7 +17,7 @@ router.post(
 );
 router.get("/project-get", getAllProjectAll);
 
-router.get("/project-get/:Id", GetProjectById);
+router.get("/project-details/:slug", GetProjectById);
 
 router.post("/project/update", updateProject);
 
