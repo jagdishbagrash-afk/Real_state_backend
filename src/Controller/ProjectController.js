@@ -30,7 +30,6 @@ exports.CreateprojectAdd = async (req, res) => {
       client_review,
       client_name,
       location,
-      date,
       slug: title.toLowerCase().replace(/\s+/g, "-"),
       banner_image,
       list_image,
