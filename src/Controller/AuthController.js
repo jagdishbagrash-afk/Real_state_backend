@@ -32,7 +32,6 @@ exports.verifyToken = async (req, res, next) => {
 
     // Verify token
     const decode = jwt.verify(token, process.env.JWT_SECRET);
-    console.log("decode", decode)
     if (!decode) {
       return res.status(401).json({
         status: false,
@@ -67,7 +66,6 @@ exports.verifyToken = async (req, res, next) => {
 exports.signup = catchAsync(async (req, res) => {
   try {
     const { email, password, name, phone, profileImage } = req.body;
-    console.log("req.body", req.body)
     // const hashedPassword = await bcrypt.hash(password, 12);
     // Create new user with referral data
     const newUser = new User({
@@ -91,7 +89,6 @@ exports.signup = catchAsync(async (req, res) => {
 exports.login = catchAsync(async (req, res, next) => {
   try {
     const { email, password } = req.body;
-    console.log("req.body", req.body);
     if (!email || !password) {
       return res.status(401).json({
         status: false,
@@ -107,7 +104,6 @@ exports.login = catchAsync(async (req, res, next) => {
         message: "Invalid Email or password",
       });
     }
-    console.log("user", user)
 
     // Validate password
     // const isPasswordValid = await bcrypt.compare(password, user.password);
@@ -121,7 +117,6 @@ exports.login = catchAsync(async (req, res, next) => {
     // Generate a token for the user
     const token = await signToken(user._id);
     const Profile = await User.findById(user._id).select("-password");
-    console.log("token", token)
     res.json({
       status: true,
       message: "Login Successfully!",
@@ -142,7 +137,6 @@ exports.login = catchAsync(async (req, res, next) => {
 exports.profilegettoken = catchAsync(async (req, res, next) => {
   try {
     const userId = req?.User?._id;
-    console.log("userId", userId)
     if (!userId) {
       return res.status(400).json({ msg: "User not authenticated" });
     }

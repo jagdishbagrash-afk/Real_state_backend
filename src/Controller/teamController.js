@@ -18,10 +18,8 @@ const UPLOADS_FOLDER = "uploads/";
 
 exports.addMember = async (req, res) => {
   try {
-    console.log("Body:", req.file);
     const { name, position  } = req.body;
     const  fileUrl = req.file ? req.file.location : null;
-    console.log("File URL:", fileUrl);
     if (!name || !position) {
       return res.status(400).json({
         message: "Name and Position are required",

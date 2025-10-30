@@ -5,7 +5,6 @@ exports.JobPost = catchAsync(async (req, res) => {
     try {
         const { email, name, position, phone_number, city } = req.body;
 
-        console.log(req.file)
         if (!email || !name || !position || !phone_number) {
             return res.status(400).json({
                 status: false,

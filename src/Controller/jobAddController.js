@@ -14,7 +14,6 @@ exports.createJob = async (req, res) => {
 
     } = req.body;
 
-    console.log("req.body", req.body)
     if (!title || !location || !employment_type) {
       return res.status(400).json({ error: "Title, location and job type are required." });
     }
@@ -69,7 +68,6 @@ exports.getJobs = async (req, res) => {
 exports.getJob = async (req, res) => {
   try {
     const { slug } = req.params;
-    console.log("Fetching job with slug:", slug);
 
     // Correct usage: pass an object as filter
     const job = await Job.findOne({ slug: slug });

@@ -112,11 +112,10 @@ exports.updateProject = catchAsync(async (req, res) => {
 exports.DeleteProject = catchAsync(async (req, res) => {
   try {
     const { _id } = req.body;
-    console.log("req.body", req.body)
-    const project = await Project.findById(_id);
-    if (!project) {
-      return res.status(404).json({ status: false, message: "Project not found" });
-    }
+    const project = await Project.findOne(_id);
+    // if (!project) {
+    //   return res.status(404).json({ status: false, message: "Project not found" });
+    // }
 
     await deleteFile(project.banner_image); // deleteFile handles single URL
 
@@ -149,7 +148,6 @@ exports.DeleteProject = catchAsync(async (req, res) => {
 exports.GetProjectById = catchAsync(async (req, res) => {
   try {
     const { slug } = req.params;
-    console.log("slug:", slug, "| type:", typeof slug);
 
     if (!slug || typeof slug !== "string") {
       return res.status(400).json({ status: false, message: "Invalid slug" });
@@ -158,7 +156,6 @@ exports.GetProjectById = catchAsync(async (req, res) => {
     // ✅ Correct query
     const project = await Project.findOne({ slug: slug.trim() });
 
-    console.log("project:", project);
 
     if (!project) {
       return res.status(404).json({
