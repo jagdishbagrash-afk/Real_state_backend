@@ -39,3 +39,5 @@ app.use("/api", require("./Routes/ContactRoute"));
 
 const server = app.listen(PORT, () => console.log("Server is running at port : " + PORT));
 server.timeout = 360000; 
+
+// pm2 start npm --name "Real_state_backend" -- run dev
