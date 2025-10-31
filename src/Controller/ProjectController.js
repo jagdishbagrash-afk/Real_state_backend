@@ -112,10 +112,11 @@ exports.updateProject = catchAsync(async (req, res) => {
 exports.DeleteProject = catchAsync(async (req, res) => {
   try {
     const { _id } = req.body;
+    console.log("req" ,req.body);
     const project = await Project.findOne(_id);
     // if (!project) {
     //   return res.status(404).json({ status: false, message: "Project not found" });
-    // }
+    // }a
 
     await deleteFile(project.banner_image); // deleteFile handles single URL
 

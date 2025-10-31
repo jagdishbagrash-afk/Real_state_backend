@@ -37,7 +37,7 @@ const ProjectModel = mongoose.Schema({
         type: String,
         enum: ['ongoing', 'completed', 'upcoming'],
         default: 'completed'
-    }
+    },
 })
 
 const ProjectModels = mongoose.model("projects", ProjectModel);
