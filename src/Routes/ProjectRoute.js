@@ -15,11 +15,22 @@ router.post(
   ]),
   CreateprojectAdd
 );
+
+router.post(
+  "/project-update",
+  upload.fields([
+    { name: "banner_image", maxCount: 1 },
+    { name: "list_image", maxCount: 1 },
+    { name: "images[]", maxCount: 10 },
+  ]),
+  updateProject
+);
+
+
 router.get("/project-get", getAllProjectAll);
 
 router.get("/project-details/:slug", GetProjectById);
 
-router.post("/project/update", updateProject);
 
 router.post("/project/delete", DeleteProject);
 

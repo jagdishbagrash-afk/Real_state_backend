@@ -6,8 +6,8 @@ const express = require("express");
 const app = express();
 const cors = require("cors");
 const corsOptions = {
-  // origin: "*", // Allowed origins
-    origin: "https://cadmaxpro.com",  // your frontend domain
+  origin: "*", // Allowed origins
+    // origin: "https://cadmaxpro.com",  // your frontend domain
   methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
   allowedHeaders: '*', // Allow all headers
   credentials: true,
@@ -15,8 +15,8 @@ const corsOptions = {
 }
 
 app.use(cors(corsOptions));
-app.use(express.json({ limit: '5000mb' }));
-app.use(express.urlencoded({ extended: true, limit: "5000mb" }));
+app.use(express.json({ limit: '3000mb' }));
+app.use(express.urlencoded({ extended: true, limit: "3000mb" }));
 
 
 app.get("/", (req, res) => {

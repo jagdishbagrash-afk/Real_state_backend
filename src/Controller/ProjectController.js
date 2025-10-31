@@ -46,6 +46,65 @@ exports.CreateprojectAdd = async (req, res) => {
 };
 
 
+exports.updateProject = async (req, res) => {
+  try {
+    const { id } = req.body;
+    const {
+      title,
+      content,
+      client,
+      category,
+      client_review,
+      client_name,
+      location,
+      status,
+    } = req.body;
+
+    // Get files (if any new ones uploaded)
+    const imageUrls = req.files?.["images[]"]?.map((f) => f.location) || [];
+    const banner_image = req.files?.["banner_image"]?.[0]?.location;
+    const list_image = req.files?.["list_image"]?.[0]?.location;
+
+    console.log("Updating project with ID:", imageUrls);
+
+    // Find existing project
+    const project = await Project.findById({_id :  id});
+    if (!project) {
+      return res.status(404).json({ status: false, message: "Project not found" });
+    }
+
+    // Update text fields
+    project.title = title || project.title;
+    project.content = content || project.content;
+    project.client = client || project.client;
+    project.category = category || project.category;
+    project.client_review = client_review || project.client_review;
+    project.client_name = client_name || project.client_name;
+    project.location = location || project.location;
+    project.status = status || project.status;
+    project.slug = title
+      ? title.toLowerCase().replace(/\s+/g, "-")
+      : project.slug;
+
+    // Update images only if new ones uploaded
+    if (banner_image) project.banner_image = banner_image;
+    if (list_image) project.list_image = list_image;
+    if (imageUrls.length > 0) {
+      project.Image = [...project.Image, ...imageUrls]; // append new images
+    }
+
+    await project.save();
+
+    res.json({
+      status: true,
+      message: "Project updated successfully",
+      data: project,
+    });
+  } catch (err) {
+    console.error("Error updating project:", err);
+    res.status(400).json({ status: false, message: err.message });
+  }
+};
 
 
 exports.getAllProjectAll = catchAsync(async (req, res) => {
@@ -85,54 +144,37 @@ exports.getAllProjectAll = catchAsync(async (req, res) => {
 });
 
 
-exports.updateProject = catchAsync(async (req, res) => {
-  const { title, content, client, date, category, Image, _id } = req.body;
-
-  const updated = await Project.findByIdAndUpdate(
-    _id,
-    { title, content, client, date, category, Image },
-    { new: true }
-  );
-
-  if (!updated) {
-    return res.status(404).json({
-      status: false,
-      message: "Project not found",
-    });
-  }
-
-  res.json({
-    status: true,
-    message: "Project Updated Successfully",
-    data: updated,
-  });
-});
 
 
 exports.DeleteProject = catchAsync(async (req, res) => {
   try {
-    const { _id } = req.body;
-    console.log("req" ,req.body);
-    const project = await Project.findOne(_id);
-    // if (!project) {
-    //   return res.status(404).json({ status: false, message: "Project not found" });
-    // }a
+    const { id } = req.body;
+    console.log("req", req.body);
 
-    await deleteFile(project.banner_image); // deleteFile handles single URL
+    if (!id) {
+      return res.status(400).json({ status: false, message: "Project ID is required" });
+    }
 
-    await deleteFile(project.list_image); // deleteFile handles single URL
+    const project = await Project.findById({_id :  id});
+    console.log("project", project);
+    if (!project) {
+      return res.status(404).json({ status: false, message: "Project not found" });
+    }
 
-    // ✅ Delete all images from S3
-    if (project.Image && project.Image.length > 0) {
-      // Loop over each image URL
+    // ✅ Delete images from S3
+    if (project.banner_image) await deleteFile(project.banner_image);
+    if (project.list_image) await deleteFile(project.list_image);
+
+    if (Array.isArray(project.Image) && project.Image.length > 0) {
       for (const url of project.Image) {
-        await deleteFile(url); // deleteFile handles single URL
+        await deleteFile(url);
       }
     }
 
-    await project.deleteOne();
+    // ✅ Delete project from DB
+    await Project.findByIdAndDelete({_id :  id });
 
-    res.json({
+    return res.json({
       status: true,
       message: "Project deleted successfully (including images)",
     });
@@ -144,6 +186,7 @@ exports.DeleteProject = catchAsync(async (req, res) => {
     });
   }
 });
+
 
 
 exports.GetProjectById = catchAsync(async (req, res) => {
