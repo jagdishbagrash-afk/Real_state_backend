@@ -7,7 +7,6 @@ const app = express();
 const cors = require("cors");
 const corsOptions = {
   origin: "*", // Allowed origins
-    // origin: "https://cadmaxpro.com",  // your frontend domain
   methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
   allowedHeaders: '*', // Allow all headers
   credentials: true,
@@ -40,6 +39,6 @@ app.use("/api", require("./Routes/ContactRoute"));
 
 
 const server = app.listen(PORT, () => console.log("Server is running at port : " + PORT));
-server.timeout = 360000; 
+server.timeout = 360000;
 
 // pm2 start npm --name "Real_state_backend" -- run dev

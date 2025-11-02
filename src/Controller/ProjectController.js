@@ -122,7 +122,10 @@ exports.getAllProjectAll = catchAsync(async (req, res) => {
 
     const totalUsers = await Project.countDocuments(query);
     const totalPages = Math.ceil(totalUsers / limit);
-    const ProjectAll = await Project.find(query).sort({ createdAt: -1 }).skip(skip).limit(limit); // Add pagination
+    let ProjectAll = await Project.find(query).sort({ createdAt: -1 }).skip(skip).limit(limit); // Add pagination
+
+    const order = { completed: 1, upcoming: 2, ongoing: 3 };
+ProjectAll.sort((a, b) => order[a.status] - order[b.status]);
 
     res.status(200).json({
       status: true,
