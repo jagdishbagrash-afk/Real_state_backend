@@ -68,7 +68,7 @@ exports.updateProject = async (req, res) => {
     console.log("Updating project with ID:", imageUrls);
 
     // Find existing project
-    const project = await Project.findById({_id :  id});
+    const project = await Project.findById({ _id: id });
     if (!project) {
       return res.status(404).json({ status: false, message: "Project not found" });
     }
@@ -125,8 +125,7 @@ exports.getAllProjectAll = catchAsync(async (req, res) => {
     let ProjectAll = await Project.find(query).sort({ createdAt: -1 }).skip(skip).limit(limit); // Add pagination
 
     const order = { completed: 1, upcoming: 2, ongoing: 3 };
-ProjectAll.sort((a, b) => order[a.status] - order[b.status]);
-
+    ProjectAll.sort((a, b) => order[a.status] - order[b.status]);
     res.status(200).json({
       status: true,
       data: ProjectAll,
@@ -158,7 +157,7 @@ exports.DeleteProject = catchAsync(async (req, res) => {
       return res.status(400).json({ status: false, message: "Project ID is required" });
     }
 
-    const project = await Project.findById({_id :  id});
+    const project = await Project.findById({ _id: id });
     console.log("project", project);
     if (!project) {
       return res.status(404).json({ status: false, message: "Project not found" });
@@ -175,7 +174,7 @@ exports.DeleteProject = catchAsync(async (req, res) => {
     }
 
     // ✅ Delete project from DB
-    await Project.findByIdAndDelete({_id :  id });
+    await Project.findByIdAndDelete({ _id: id });
 
     return res.json({
       status: true,
