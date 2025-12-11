@@ -59,32 +59,37 @@ exports.getMembers = async (req, res) => {
   }
 };
 
-// Update a Team Member
+
 exports.updateMember = async (req, res) => {
   try {
-    const { _id, name, imageurl, position } = req.body;
+    const {
+       _id, name, position
+    } = req.body;
 
-    if (!_id) {
-      return res.status(400).json({ message: "Member ID is required", status: false });
+    // Get files (if any new ones uploaded)
+    const imageUrl = req.file ? req.file.location : null;
+
+    // Find existing project
+    const project = await TeamMember.findById({ _id: _id });
+    if (!project) {
+      return res.status(404).json({ status: false, message: "Team not found" });
     }
 
-    const updated = await TeamMember.findByIdAndUpdate(
-      _id,
-      { name, imageurl, position },
-      { new: true }
-    );
+    // Update text fields
+    project.name = name || project.name;
+    project.position = position || project.position;
+    // Update images only if new ones uploaded
+    if (imageUrl) project.imageUrl = imageUrl;
+    await project.save();
 
-    if (!updated) {
-      return res.status(404).json({ message: "Member not found", status: false });
-    }
-
-    res.status(200).json({
-      message: "Team member updated successfully",
-      data: updated,
+    res.json({
       status: true,
+      message: "Teams updated successfully",
+      data: project,
     });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error("Error updating project:", err);
+    res.status(400).json({ status: false, message: err.message });
   }
 };
 
@@ -92,7 +97,7 @@ exports.updateMember = async (req, res) => {
 exports.deleteMember = async (req, res) => {
   try {
     const { _id } = req.body;
-
+console.log("_id" ,_id)
     if (!_id) {
       return res.status(400).json({ message: "Member ID is required", status: false });
     }
@@ -104,7 +109,6 @@ exports.deleteMember = async (req, res) => {
           return errorResponse(res, "Failed to delete file from Cloud", 500, false);
         }
       }
-
     if (!deleted) {
       return res.status(404).json({ message: "Member not found", status: false });
     }
