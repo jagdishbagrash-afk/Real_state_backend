@@ -86,9 +86,6 @@ const deleteFile = async (fileUrl) => {
         return { status: false, message: 'Error deleting file', error: error.message };
     }
 };
-
-
-
 const uploadMultipleFiles = (req, res) => {
   return new Promise((resolve, reject) => {
     upload.array("images", 10)(req, res, (err) => {

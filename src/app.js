@@ -34,7 +34,6 @@ app.use("/api", require("./Routes/ProjectRoute"));
 app.use("/api", require("./Routes/teamRoutes"));
 app.use("/api", require("./Routes/BlogRoute"));
 app.use("/api", require("./Routes/CarrerRoute"));
-
 app.use("/api", require("./Routes/ContactRoute"));
 
 

@@ -1,25 +1,20 @@
 const TeamMember = require("../Model/TeamMember");
-const { uploadFileToSpaces } = require("../Utill/S3.js");
 const { deleteFile } = require('../Utill/S3.js');
-const { PutObjectCommand } = require('@aws-sdk/client-s3');
-const { S3Client } = require('@aws-sdk/client-s3');
+const { S3Client, DeleteObjectCommand } = require("@aws-sdk/client-s3");
 
 const s3Client = new S3Client({
-    region: process.env.AWS_REGION,
-    credentials: {
-        accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
-    },
+  region: process.env.AWS_REGION,
+  credentials: {
+    accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+  },
 });
 // Define the UPLOADS_FOLDER
-const UPLOADS_FOLDER = "uploads/";
-
-// Create a Team Member
 
 exports.addMember = async (req, res) => {
   try {
-    const { name, position  } = req.body;
-    const  fileUrl = req.file ? req.file.location : null;
+    const { name, position } = req.body;
+    const fileUrl = req.file ? req.file.location : null;
     if (!name || !position) {
       return res.status(400).json({
         message: "Name and Position are required",
@@ -63,7 +58,7 @@ exports.getMembers = async (req, res) => {
 exports.updateMember = async (req, res) => {
   try {
     const {
-       _id, name, position
+      _id, name, position
     } = req.body;
 
     // Get files (if any new ones uploaded)
@@ -97,18 +92,17 @@ exports.updateMember = async (req, res) => {
 exports.deleteMember = async (req, res) => {
   try {
     const { _id } = req.body;
-console.log("_id" ,_id)
+    console.log("_id", _id)
     if (!_id) {
       return res.status(400).json({ message: "Member ID is required", status: false });
     }
     const deleted = await TeamMember.findByIdAndDelete(_id);
-      if(deleted?.imageUrl)
-      {
-        const deleteResponse = await deleteFile(deleted.imageUrl);
-        if (!deleteResponse.status) {
-          return errorResponse(res, "Failed to delete file from Cloud", 500, false);
-        }
+    if (deleted?.imageUrl) {
+      const deleteResponse = await deleteFile(deleted.imageUrl);
+      if (!deleteResponse.status) {
+        return errorResponse(res, "Failed to delete file from Cloud", 500, false);
       }
+    }
     if (!deleted) {
       return res.status(404).json({ message: "Member not found", status: false });
     }
@@ -121,3 +115,38 @@ console.log("_id" ,_id)
     res.status(500).json({ error: err.message });
   }
 };
+
+exports.DeleteAWSImages = async (req, res) => {
+  try {
+    let { images } = req.body;
+    // ensure array
+    if (!Array.isArray(images)) {
+      images = [images];
+    }
+    // extract keys from urls
+    const keys = images.map(url => url.split(".com/")[1]);
+
+    // delete each
+    for (const key of keys) {
+    const record =  await s3Client.send(
+        new DeleteObjectCommand({
+          Bucket: process.env.S3_BUCKET_NAME,
+          Key: key
+        })
+      );
+      console.log("record" ,record)
+    }
+
+    return res.status(200).json({
+      status: true,
+      message: "Images deleted successfully"
+    });
+
+  } catch (err) {
+    return res.status(500).json({
+      status: false,
+      error: err.message
+    });
+  }
+};
+

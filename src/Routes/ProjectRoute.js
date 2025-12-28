@@ -1,5 +1,5 @@
 const express = require('express');
-const { CreateprojectAdd, getAllProjectAll, GetProjectById, DeleteProject, updateProject } = require('../Controller/ProjectController');
+const { CreateprojectAdd, getAllProjectAll, GetProjectById, DeleteProject, updateProject  ,DeleteAWSImages } = require('../Controller/ProjectController');
 const { upload } = require("../Utill/S3");
 
 const router = express.Router();
@@ -33,6 +33,8 @@ router.get("/project-details/:slug", GetProjectById);
 
 
 router.post("/project/delete", DeleteProject);
+
+router.get("/project/images/delete/:projectId/:images" ,DeleteAWSImages)
 
 
 module.exports = router;
