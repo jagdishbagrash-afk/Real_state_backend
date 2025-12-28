@@ -267,16 +267,16 @@ exports.DeleteAWSImages = catchAsync(async (req, res) => {
     );
 
 
-     // 🔥 banner / list image ho to null kar do
-    await Project.updateOne(
-      { _id: projectId, banner_image: { $in: images } },
-      { $set: { banner_image: null } }
-    );
+    //  // 🔥 banner / list image ho to null kar do
+    // await Project.updateOne(
+    //   { _id: projectId, banner_image: { $in: images } },
+    //   { $set: { banner_image: null } }
+    // );
 
-    await Project.updateOne(
-      { _id: projectId, list_image: { $in: images } },
-      { $set: { list_image: null } }
-    );
+    // await Project.updateOne(
+    //   { _id: projectId, list_image: { $in: images } },
+    //   { $set: { list_image: null } }
+    // );
 
     return res.status(200).json({
       status: true,
