@@ -2,6 +2,8 @@ const { S3Client, DeleteObjectCommand, HeadObjectCommand } = require('@aws-sdk/c
 const multer = require('multer');
 const multerS3 = require('multer-s3');
 require('aws-sdk/lib/maintenance_mode_message').suppress = true;
+const processImageBuffer = require('./processImageBuffer');
+
 
 const s3Client = new S3Client({
     region: process.env.AWS_REGION,
@@ -38,7 +40,6 @@ const uploadFile = (req, res) => {
     return new Promise((resolve, reject) => {
         upload.single('file')(req, res, (err) => {
             if (req.file) {
-                // console.log("File Uploaded Successfully:", req.file);
                 resolve({ status: true, message: "File uploaded successfully", fileUrl: req?.file?.location });
             }
             else if (err) {
@@ -64,7 +65,6 @@ const uploadFile = (req, res) => {
 const deleteFile = async (fileUrl) => {
     const bucketName = process.env.S3_BUCKET_NAME;
 
-    // Extract the key from the file URL and ensure it starts with "uploads/"
     let key = decodeURIComponent(fileUrl.split(`https://${bucketName}.s3.${process.env.AWS_REGION}.amazonaws.com/`)[1]);
 
     if (!key || !key.startsWith(UPLOADS_FOLDER)) {
