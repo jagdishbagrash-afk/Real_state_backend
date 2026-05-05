@@ -26,7 +26,6 @@ const multerConfig = {
         if (file.mimetype.startsWith('image/') || file.mimetype === 'application/pdf') {
             return cb(null, true);
         }
-        
         return cb(null, false);
     },
     limits: {
