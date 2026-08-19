@@ -1,8 +1,66 @@
 const Project = require("../Model/Project");
 const catchAsync = require('../Utill/catchAsync');
 const { deleteFile } = require("../Utill/S3");
+const { S3Client, DeleteObjectCommand } = require("@aws-sdk/client-s3");
 
-// Create a new project
+const s3Client = new S3Client({
+  region: process.env.AWS_REGION,
+  credentials: {
+    accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+  },
+});
+
+// // Create a new project
+// exports.CreateprojectAdd = async (req, res) => {
+//   try {
+//     const {
+//       title,
+//       content,
+//       client,
+//       category,
+//       client_review,
+//       client_name,
+//       location,
+//       status,
+//     } = req.body;
+
+
+//     const imageUrls = req.files["images[]"]?.map((f) => f.location) || [];
+//     const banner_image = req.files["banner_image"]?.[0]?.location || "";
+//     const list_image = req.files["list_image"]?.[0]?.location || "";
+
+
+//     const record = new Project({
+//       title,
+//       content,
+//       client,
+//       category,
+//       client_review,
+//       client_name,
+//       location,
+//       slug: title.toLowerCase().replace(/\s+/g, "-"),
+//       banner_image,
+//       list_image,
+//       Image: imageUrls,
+//       status
+//     });
+
+//     await record.save();
+//     res.json({ status: true, message: "Project added successfully", data: record });
+//   } catch (err) {
+//     console.error("Error creating project:", err);
+//     res.status(400).json({ status: false, message: err.message });
+//   }
+// };
+
+
+
+const {
+  uploadFile,
+  uploadMultipleFiles,
+} = require("../Utill/s3Upload");
+
 exports.CreateprojectAdd = async (req, res) => {
   try {
     const {
@@ -18,8 +76,8 @@ exports.CreateprojectAdd = async (req, res) => {
 
 
     const imageUrls = req.files["images[]"]?.map((f) => f.location) || [];
-    const banner_image = req.files["banner_image"]?.[0]?.location || "";
     const list_image = req.files["list_image"]?.[0]?.location || "";
+    const banner_image = req.files["banner_image"]?.[0]?.location || "";
 
 
     const record = new Project({
@@ -34,78 +92,142 @@ exports.CreateprojectAdd = async (req, res) => {
       banner_image,
       list_image,
       Image: imageUrls,
-      status
+      status,
     });
 
     await record.save();
-    res.json({ status: true, message: "Project added successfully", data: record });
+
+    res.json({
+      status: true,
+      message: "Project added successfully",
+      data: record,
+    });
   } catch (err) {
-    console.error("Error creating project:", err);
-    res.status(400).json({ status: false, message: err.message });
+    res.status(400).json({
+      status: false,
+      message: err.message,
+    });
   }
 };
 
+// exports.updateProject = async (req, res) => {
+//   try {
+//     const { id } = req.body;
+//     const {
+//       title,
+//       content,
+//       client,
+//       category,
+//       client_review,
+//       client_name,
+//       location,
+//       status,
+//     } = req.body;
 
-exports.updateProject = async (req, res) => {
+//     // Get files (if any new ones uploaded)
+//     const imageUrls = req.files?.["images[]"]?.map((f) => f.location) || [];
+//     const banner_image = req.files?.["banner_image"]?.[0]?.location;
+//     const list_image = req.files?.["list_image"]?.[0]?.location;
+
+//     console.log("Updating project with ID:", imageUrls);
+
+//     // Find existing project
+//     const project = await Project.findById({ _id: id });
+//     if (!project) {
+//       return res.status(404).json({ status: false, message: "Project not found" });
+//     }
+
+//     // Update text fields
+//     project.title = title || project.title;
+//     project.content = content || project.content;
+//     project.client = client || project.client;
+//     project.category = category || project.category;
+//     project.client_review = client_review || project.client_review;
+//     project.client_name = client_name || project.client_name;
+//     project.location = location || project.location;
+//     project.status = status || project.status;
+//     project.slug = title
+//       ? title.toLowerCase().replace(/\s+/g, "-")
+//       : project.slug;
+
+//     // Update images only if new ones uploaded
+//     if (banner_image) project.banner_image = banner_image;
+//     if (list_image) project.list_image = list_image;
+//     if (imageUrls.length > 0) {
+//       project.Image = [...project.Image, ...imageUrls]; // append new images
+//     }
+
+//     await project.save();
+
+//     res.json({
+//       status: true,
+//       message: "Project updated successfully",
+//       data: project,
+//     });
+//   } catch (err) {
+//     console.error("Error updating project:", err);
+//     res.status(400).json({ status: false, message: err.message });
+//   }
+// };
+
+
+exports.UpdateProject = (async (req, res) => {
   try {
-    const { id } = req.body;
-    const {
-      title,
+    const { title,
       content,
       client,
       category,
       client_review,
       client_name,
       location,
-      status,
-    } = req.body;
+      status, } = req.body;
 
-    // Get files (if any new ones uploaded)
-    const imageUrls = req.files?.["images[]"]?.map((f) => f.location) || [];
-    const banner_image = req.files?.["banner_image"]?.[0]?.location;
-    const list_image = req.files?.["list_image"]?.[0]?.location;
+    const data = await Project.findById(req.body.id);
+    console.log("data", data)
 
-    console.log("Updating project with ID:", imageUrls);
-
-    // Find existing project
-    const project = await Project.findById({ _id: id });
-    if (!project) {
+    if (!data) {
       return res.status(404).json({ status: false, message: "Project not found" });
     }
 
-    // Update text fields
-    project.title = title || project.title;
-    project.content = content || project.content;
-    project.client = client || project.client;
-    project.category = category || project.category;
-    project.client_review = client_review || project.client_review;
-    project.client_name = client_name || project.client_name;
-    project.location = location || project.location;
-    project.status = status || project.status;
-    project.slug = title
-      ? title.toLowerCase().replace(/\s+/g, "-")
-      : project.slug;
-
-    // Update images only if new ones uploaded
-    if (banner_image) project.banner_image = banner_image;
-    if (list_image) project.list_image = list_image;
-    if (imageUrls.length > 0) {
-      project.Image = [...project.Image, ...imageUrls]; // append new images
+    // ✅ Update fields
+    if (title) {
+      data.slug = title ? title.toLowerCase().replace(/\s+/g, "-") : project.slug;
     }
 
-    await project.save();
+    data.title = title || data.title;
+    data.content = content || data.content;
+    data.client = client || data.client;
+    data.category = category || data.category;
+    data.client_review = client_review || data.client_review;
+    data.client_name = client_name || data.client_name;
+    data.location = location || data.location;
+    data.status = status || data.status;
+
+    // Get files (if any new ones uploaded)
+    const imageUrls = req.files?.["images[]"]?.map((f) => f.location) || [];
+    const list_image = req.files?.["list_image"]?.[0]?.location;
+    const banner_image = req.files?.["banner_image"]?.[0]?.location;
+
+
+    if (list_image) data.list_image = list_image;
+    if (banner_image) data.banner_image = banner_image;
+
+    if (imageUrls.length > 0) {
+      data.Image = [...data.Image, ...imageUrls];
+    }
+
+    const updatedprojects = await data.save();
 
     res.json({
       status: true,
       message: "Project updated successfully",
-      data: project,
+      data: updatedprojects,
     });
-  } catch (err) {
-    console.error("Error updating project:", err);
-    res.status(400).json({ status: false, message: err.message });
+  } catch (error) {
+    console.log(error);
+    res.status(400).json({ status: false, message: error.message });
   }
-};
-
+});
 
 exports.getAllProjectAll = catchAsync(async (req, res) => {
   try {
@@ -224,4 +346,61 @@ exports.GetProjectById = catchAsync(async (req, res) => {
   }
 });
 
+
+exports.DeleteAWSImages = catchAsync(async (req, res) => {
+  try {
+    let { projectId, imageUrl } = req.params;
+
+    if (!projectId) {
+      return res.status(400).json({ status: false, message: "projectId required" });
+    }
+
+    if (!imageUrl) {
+      return res.status(400).json({ status: false, message: "imageUrl required" });
+    }
+
+    // decode URL (IMPORTANT)
+    imageUrl = decodeURIComponent(imageUrl);
+
+    // make array
+    const images = [imageUrl];
+
+    // extract keys
+    const keys = images.map(url => url.split(".com/")[1]);
+
+    // 🔥 Delete from S3 (parallel)
+    await Promise.all(
+      keys.map(key =>
+        s3Client.send(
+          new DeleteObjectCommand({
+            Bucket: process.env.S3_BUCKET_NAME,
+            Key: key
+          })
+        )
+      )
+    );
+
+    // 🔥 DB se remove
+    await Project.updateOne(
+      { _id: projectId },
+      {
+        $pull: {
+          Image: { $in: images }
+        }
+      }
+    );
+
+    return res.status(200).json({
+      status: true,
+      message: "Image deleted successfully"
+    });
+
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({
+      status: false,
+      error: err.message
+    });
+  }
+});
 
