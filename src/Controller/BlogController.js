@@ -1,45 +1,73 @@
 const Blog = require('../Model/Blog');
 const catchAsync = require('../Utill/catchAsync');
 
-// Create a new blog post
+
 exports.createBlog = catchAsync(async (req, res) => {
   try {
-    const { title, content, Image, short_content } = req.body;
+    console.log("========== CREATE BLOG ==========");
+    console.log("BODY:", req.body);
+    console.log("FILE:", req.file);
+
+    const {
+      title,
+      content,
+      short_content,
+      meta_title,
+      meta_description,
+      meta_keyword,
+    } = req.body || {};
+
     if (!title || !content || !short_content) {
-      logger.warn("All fields (title, content, short content) are required.")
       return res.status(400).json({
         status: false,
-        message: "All fields (title, content, short content) are required.",
+        message: "Title, content and short content are required.",
       });
     }
+
+    const image = req.file?.location || "";
+
     const slug = title
       .trim()
       .toLowerCase()
       .replace(/\s+/g, "-")
-      .replace(/[^\u0900-\u097F\w\-]/g, "")      
-      .replace(/-+/g, "-")                     
+      .replace(/[^\u0900-\u097F\w\-]/g, "")
+      .replace(/-+/g, "-")
       .replace(/^-+|-+$/g, "");
+
+    console.log("META TITLE:", meta_title);
+    console.log("META DESCRIPTION:", meta_description);
+    console.log("META KEYWORD:", meta_keyword);
+    console.log("IMAGE:", image);
+
     const newBlog = new Blog({
       title,
-      slug: slug,
+      slug,
       content,
       short_content,
-      Image,
+      image,
+      meta_title: meta_title || "",
+      meta_description: meta_description || "",
+      meta_keyword: meta_keyword || "",
     });
+
     const record = await newBlog.save();
 
-    res.status(201).json({
+    console.log("SAVED BLOG:", record);
+
+    return res.status(201).json({
       status: true,
-      message: "Blog Success"
+      message: "Blog created successfully",
+      data: record,
     });
   } catch (error) {
-    res.status(400).json({
+    console.error("CREATE BLOG ERROR:", error);
+
+    return res.status(400).json({
       status: false,
       message: error.message,
     });
   }
-}
-);
+});
 
 // Get all blog posts
 exports.getAllBlogs = catchAsync(async (req, res) => {
@@ -108,53 +136,69 @@ exports.getBlogById = catchAsync(
   }
 );
 
-// Update a blog post by ID
+// Update Blog
 exports.updateBlogById = catchAsync(async (req, res) => {
   try {
+    const {
+      title,
+      content,
+      short_content,
+      _id,
+      meta_title,
+      meta_description,
+      meta_keyword,
+    } = req.body;
 
-    const { title, content, Image, _id, short_content } = req.body;
-    // Validate required fields
     if (!title || !content || !_id || !short_content) {
-      logger.warn("All fields (title, content, Image , short_content) are required.")
       return res.status(400).json({
         status: false,
-        message: "All fields (title, content, Image) are required.",
+        message: "Title, content, short content and _id are required.",
       });
     }
+
+    const blog = await Blog.findById(_id);
+
+    if (!blog) {
+      return res.status(404).json({
+        status: false,
+        message: "Blog not found",
+      });
+    }
+
     const slug = title
       .trim()
       .toLowerCase()
       .replace(/\s+/g, "-")
-      .replace(/[^\u0900-\u097F\w\-]/g, "")      // keep Hindi + a-z + 0-9 + _
-      .replace(/-+/g, "-")                       // remove multiple dashes
-      .replace(/^-+|-+$/g, "");                  // trim dashes from start/end
+      .replace(/[^\u0900-\u097F\w\-]/g, "")
+      .replace(/-+/g, "-")
+      .replace(/^-+|-+$/g, "");
 
+    // Keep old image if new image is not uploaded
+    let image = blog.image;
 
-    const blog = await Blog.findByIdAndUpdate(
-      _id,
-      {
-        title, content, Image, short_content, meta_title: req.body.meta_title,
-        meta_description: req.body.meta_description, meta_keyword: req.body.meta_keyword,
-        slug: slug,
-      },
-      {
-        new: true,
-        runValidators: true,
-      }
-    );
-    if (!blog) {
-      return res.status(404).json({
-        status: false,
-        message: 'Blog not found',
-      });
+    if (req.file) {
+      image = req.file.location;
     }
-    res.status(200).json({
+
+    blog.title = title;
+    blog.content = content;
+    blog.short_content = short_content;
+    blog.image = image;
+    blog.slug = slug;
+
+    blog.meta_title = meta_title || "";
+    blog.meta_description = meta_description || "";
+    blog.meta_keyword = meta_keyword || "";
+
+    const updatedBlog = await blog.save();
+
+    return res.status(200).json({
       status: true,
-      data: blog,
-      message: "Bolg Update"
+      data: updatedBlog,
+      message: "Blog updated successfully",
     });
   } catch (error) {
-    res.status(400).json({
+    return res.status(400).json({
       status: false,
       message: error.message,
     });
@@ -186,3 +230,5 @@ exports.BlogIdDelete = catchAsync(async (req, res, next) => {
     });
   }
 });
+
+
