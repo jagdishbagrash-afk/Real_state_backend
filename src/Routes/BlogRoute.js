@@ -17,6 +17,11 @@ router.get(
 );
 
 router.get(
+    "/blog/details/:slug",
+    blogController.getBlogBySlug
+);
+
+router.get(
     "/blog/get/:Id",
     blogController.getBlogById
 );

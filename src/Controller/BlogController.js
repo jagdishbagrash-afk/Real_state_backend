@@ -204,7 +204,41 @@ exports.updateBlogById = catchAsync(async (req, res) => {
     });
   }
 });
+exports.getBlogBySlug = catchAsync(async (req, res) => {
+  try {
+    const { slug } = req.params;
 
+    if (!slug) {
+      return res.status(400).json({
+        status: false,
+        message: "Blog slug is required",
+      });
+    }
+
+    const blog = await Blog.findOne({
+      slug: slug.toLowerCase().trim(),
+    });
+
+    if (!blog) {
+      return res.status(404).json({
+        status: false,
+        message: "Blog not found",
+      });
+    }
+
+    return res.status(200).json({
+      status: true,
+      message: "Blog fetched successfully",
+      data: blog,
+    });
+
+  } catch (error) {
+    return res.status(500).json({
+      status: false,
+      message: error.message,
+    });
+  }
+});
 // Delete a blog post by ID
 exports.BlogIdDelete = catchAsync(async (req, res, next) => {
   try {
